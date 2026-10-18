@@ -19,7 +19,9 @@ concurrency:
 
 jobs:
   build:
-    name: 构建（同时产出 Pages 制品）
+    # 注意：name 会成为分支保护里的 required check 名字，改它会让规则失效 → 保持 ASCII 稳定
+    # （中文说明放注释里：构建 + 产出 Pages 制品）
+    name: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -62,7 +64,7 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    name: 发布到 GitHub Pages
+    name: deploy
     needs: build
     # 只有 main 的 push / 手动触发才发布，PR 一律不碰生产
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
