@@ -1,0 +1,14 @@
+# 统一换行符：避免 Windows 提交 CRLF、CI 上脚本解析出错
+# 参考 https://git-scm.com/docs/gitattributes
+* text=auto eol=lf
+
+# 二进制文件不要做换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+
+# lockfile 保持原样，diff 更可读
+package-lock.json -text

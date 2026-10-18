@@ -29,6 +29,11 @@ jobs:
           node-version: 22
           cache: npm
 
+      # 提前拦掉"I love you"级别的问题：lockfile 里的空壳条目（缺 version）
+      # 官方 npm ci 遇到它只会甩一句 `Invalid Version:`，冒号后面还是空的，极难排查
+      - name: lockfile 健康检查
+        run: node scripts/check-lockfile.mjs
+
       - name: 安装依赖
         run: npm ci
 
