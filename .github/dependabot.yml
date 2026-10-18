@@ -1,0 +1,26 @@
+# 依赖与 GitHub Actions 的自动升级：把"供应链维护"变成自动 PR
+# 文档：https://docs.github.com/code-security/dependabot/dependabot-version-updates
+version: 2
+updates:
+  # npm 依赖（astro、@astrojs/* 等）
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # 同类小版本合并成一个 PR，避免每周被 10 个 PR 淹没
+      astro:
+        patterns:
+          - "astro"
+          - "@astrojs/*"
+
+  # workflow 里用到的 action（actions/checkout、setup-node 等）
+  # 这条才是让 v5 → v7 自动找上门的机制
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
