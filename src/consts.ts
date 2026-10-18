@@ -7,7 +7,7 @@ export const SITE = {
   /** 一句话简介，用于首页和 SEO 描述 */
   description: '工程实践、源码阅读与生活杂记。用最少的装饰，放最多的内容。',
   /** 站点上线地址（也是 RSS 的兜底地址） */
-  url: 'https://example.com',
+  url: 'https://leezhopes.github.io',
   nav: [
     { href: '/', label: '首页' },
     { href: '/blog/', label: '文章' },
