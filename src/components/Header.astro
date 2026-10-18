@@ -1,0 +1,53 @@
+---
+import { SITE } from '../consts';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path.startsWith(href);
+---
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/">
+      {SITE.title.slice(0, 1)}<span class="brand-mark">/</span>{SITE.title.slice(1)}
+    </a>
+
+    <nav class="site-nav" aria-label="主导航">
+      {
+        SITE.nav.map((item) => (
+          <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+
+      <button class="theme-toggle" data-theme-toggle type="button" aria-label="切换深浅色主题">
+        <span class="icon-light" aria-hidden="true">◐</span>
+        <span class="icon-dark" aria-hidden="true">◑</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const root = document.documentElement;
+  const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+  const current = (): 'light' | 'dark' =>
+    root.dataset.theme === 'dark' || root.dataset.theme === 'light'
+      ? root.dataset.theme
+      : systemDark.matches
+        ? 'dark'
+        : 'light';
+
+  toggle?.addEventListener('click', () => {
+    const next = current() === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* 隐私模式下写不了 localStorage，忽略 */
+    }
+  });
+</script>

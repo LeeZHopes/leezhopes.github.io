@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostList from '../components/PostList.astro';
+import { SITE, HOME_POST_LIMIT } from '../consts';
+import { sortByDateDesc } from '../lib/blog';
+
+const posts = sortByDateDesc(await getCollection('blog', ({ data }) => !data.draft));
+const recent = posts.slice(0, HOME_POST_LIMIT);
+---
+
+<BaseLayout>
+  <section class="hero">
+    <h1>{SITE.title} — {SITE.description}</h1>
+    <p>
+      目前有 {posts.length} 篇文章。想看全部就去 <a href="/blog/">归档</a>，
+      想按主题翻就点 <a href="/tags/">标签</a>。
+    </p>
+  </section>
+
+  <section>
+    <h2 class="section-title">最新文章</h2>
+    <PostList posts={recent} />
+  </section>
+</BaseLayout>

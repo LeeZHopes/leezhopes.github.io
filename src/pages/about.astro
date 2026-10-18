@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+
+const stack = [
+  ['框架', 'Astro（静态输出，默认零 JS）'],
+  ['内容', 'Markdown + Astro Content Collections'],
+  ['样式', '手写 CSS，无 UI 框架'],
+  ['部署', '任意静态托管：Pages / Vercel / 对象存储'],
+];
+---
+
+<BaseLayout title="关于" description={`关于 ${SITE.title} 与作者。`}>
+  <h1 class="section-title">关于</h1>
+
+  <div class="prose">
+    <p>
+      这里是一个人的笔记本，主要放三类东西：工程实践里踩过的坑、读源码时的笔记，
+      以及偶尔一些不成体系的想法。写下来的目的首先是给自己看，其次才是给别人看——
+      所以不追热点，也不保证更新频率。
+    </p>
+
+    <h2>这个站是怎么搭的</h2>
+    <p>
+      没有用现成的主题，也没有上 CMS。整个站就是一堆 Markdown 加一套手写样式，
+      构建完是纯静态 HTML，打开速度取决于网络而不是框架。
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>部分</th><th>选择</th></tr>
+      </thead>
+      <tbody>
+        {stack.map(([k, v]) => (
+          <tr><td>{k}</td><td>{v}</td></tr>
+        ))}
+      </tbody>
+    </table>
+
+    <h2>联系</h2>
+    <p>
+      想交流可以发邮件，或者在 <a href="https://github.com/" rel="noopener" target="_blank">GitHub</a> 上找到我。
+      也可以订阅 <a href="/rss.xml">RSS</a>，有新文章时会推送过去。
+    </p>
+  </div>
+</BaseLayout>

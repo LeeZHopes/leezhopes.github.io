@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import { groupByYear, sortByDateDesc } from '../../lib/blog';
+
+const posts = sortByDateDesc(await getCollection('blog', ({ data }) => !data.draft));
+const groups = groupByYear(posts);
+---
+
+<BaseLayout title="归档" description="全部文章，按年份归档。">
+  <h1 class="section-title">全部文章 · {posts.length}</h1>
+
+  {
+    groups.map(([year, list]) => (
+      <section class="year-group">
+        <h2 class="year-label">{year}</h2>
+        <PostList posts={list} />
+      </section>
+    ))
+  }
+</BaseLayout>

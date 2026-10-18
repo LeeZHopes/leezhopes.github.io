@@ -1,0 +1,40 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import { sortByDateDesc } from '../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+
+  const byTag = new Map<string, CollectionEntry<'blog'>[]>();
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      const list = byTag.get(tag) ?? [];
+      list.push(post);
+      byTag.set(tag, list);
+    }
+  }
+
+  return [...byTag.entries()].map(([tag, list]) => ({
+    params: { tag },
+    props: { tag, posts: sortByDateDesc(list) },
+  }));
+}
+
+interface Props {
+  tag: string;
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`标签：${tag}`} description={`标签「${tag}」下的全部文章。`}>
+  <h1 class="section-title">标签 / {tag}</h1>
+  <PostList posts={posts} />
+  <p style="margin-top:2rem;font-size:.875rem">
+    <a href="/tags/">← 回到全部标签</a>
+  </p>
+</BaseLayout>

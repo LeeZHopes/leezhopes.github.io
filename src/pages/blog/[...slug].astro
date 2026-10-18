@@ -1,0 +1,134 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../consts';
+import { formatDate, readingTime, sortByDateDesc } from '../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = sortByDateDesc(await getCollection('blog', ({ data }) => !data.draft));
+
+  return posts.map((post, index) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      newer: posts[index - 1] ?? null,
+      older: posts[index + 1] ?? null,
+    },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  newer: CollectionEntry<'blog'> | null;
+  older: CollectionEntry<'blog'> | null;
+}
+
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2);
+const { title, description, pubDate, updatedDate, tags } = post.data;
+---
+
+<BaseLayout title={title} description={description || SITE.description}>
+  <article>
+    <header class="post-header">
+      <h1>{title}</h1>
+      <div class="post-meta">
+        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        <span>{readingTime(post.body)} 分钟读完</span>
+        {updatedDate && <span>更新于 {formatDate(updatedDate)}</span>}
+        {
+          tags.length > 0 && (
+            <span>
+              {tags.map((tag, i) => (
+                <>
+                  {i > 0 && ' / '}
+                  <a href={`/tags/${encodeURIComponent(tag)}/`}>{tag}</a>
+                </>
+              ))}
+            </span>
+          )
+        }
+      </div>
+    </header>
+
+    {
+      toc.length > 1 && (
+        <details class="toc">
+          <summary>本文目录</summary>
+          <ol>
+            {toc.map((h) => (
+              <li>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )
+    }
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <footer class="post-footer">
+      {
+        older ? (
+          <div class="post-nav">
+            <span class="label">← 更早</span>
+            <a href={`/blog/${older.id}/`}>{older.data.title}</a>
+          </div>
+        ) : (
+          <span />
+        )
+      }
+      {
+        newer && (
+          <div class="post-nav next">
+            <span class="label">更新 →</span>
+            <a href={`/blog/${newer.id}/`}>{newer.data.title}</a>
+          </div>
+        )
+      }
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .toc {
+    margin-bottom: 2.25rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+  }
+
+  .toc summary {
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .toc ol {
+    margin: 0.7rem 0 0;
+    padding-left: 1.1rem;
+    color: var(--muted);
+  }
+
+  .toc li + li {
+    margin-top: 0.3rem;
+  }
+
+  .toc a {
+    border-bottom: 0;
+    color: var(--fg);
+  }
+
+  .toc a:hover {
+    color: var(--accent);
+  }
+</style>
