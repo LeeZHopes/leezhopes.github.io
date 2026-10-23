@@ -29,6 +29,6 @@ jobs:
       - name: 失败之后默认跳过（预期：不跑）
         run: echo "不该出现"
 
-      - name: if: always() （预期：跑）
+      - name: if_always() （预期：跑）
         if: always()
         run: echo "always 生效，所以报告能上传"
