@@ -1,6 +1,8 @@
 # 博客 CI/CD：PR 只验证，main 验证 + 发布到 GitHub Pages
 # 前置：仓库名必须是 <用户名>.github.io；Settings → Pages → Source = GitHub Actions
-name: CI & Deploy
+#
+# workflow 名取短名 `ci`：侧边栏和搜索框里更好找、更好打（required check 认的是 job 名 build，不受此处影响）
+name: ci
 
 on:
   push:
