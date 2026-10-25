@@ -1,0 +1,103 @@
+# 实验合集：一条 workflow，手动选择要跑哪个实验
+#
+# 为什么合并：三个实验各自 `on: push` 时，一次提交会同时拉起 3~4 个 run，把真正的 ci 淹没。
+# 这里改成「只手动触发 + 下拉选实验」，代码留着随时可跑，列表里只多一条条目。
+#
+# 用法：Actions → 左侧 labs → Run workflow → 选分支 → 下拉选实验 → Run
+# 注意：workflow_dispatch 的按钮只为**默认分支上存在**的这个文件渲染（见第 01 课）。
+
+name: labs
+
+on:
+  workflow_dispatch:
+    inputs:
+      lab:
+        description: 要跑哪个实验
+        required: true
+        default: events
+        type: choice
+        options:
+          - events
+          - conditions
+          - data
+
+permissions:
+  contents: read
+
+jobs:
+  # ── 实验 1：事件与 ref（第 01 课）──────────────────────────────
+  events:
+    name: events · 触发与 ref
+    if: inputs.lab == 'events'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "event=${{ github.event_name }}"
+          echo "ref=${{ github.ref }}"
+          echo "sha=${{ github.sha }}"
+          echo "head_ref=${{ github.head_ref }}"
+          echo "base_ref=${{ github.base_ref }}"
+
+  # ── 实验 2：条件与状态函数（第 02 课）──────────────────────────
+  conditions:
+    name: conditions · 条件与状态函数
+    if: inputs.lab == 'conditions'
+    runs-on: ubuntu-latest
+    env:
+      DEBUG: "false"          # 字符串，不是布尔
+    steps:
+      - name: 打印事实
+        run: |
+          echo "ref=${{ github.ref }}"
+          echo "是否等于 refs/heads/main => ${{ github.ref == 'refs/heads/main' }}"
+
+      - name: env.DEBUG 直接当条件（预期：跑）
+        if: env.DEBUG
+        run: echo "你以为关了，其实没关"
+
+      - name: env.DEBUG 显式比较（预期：跳过）
+        if: env.DEBUG == 'true'
+        run: echo "这行不会出现"
+
+      - name: 故意失败（这个 job 因此是红的，属于设计）
+        run: exit 1
+
+      - name: 失败之后默认跳过（预期：不跑）
+        run: echo "不该出现"
+
+      - name: if_always()（预期：跑）
+        if: always()
+        run: echo "always 生效，所以报告能上传"
+
+  # ── 实验 3：job 之间传数据（第 03 课）──────────────────────────
+  produce:
+    name: data · produce
+    if: inputs.lab == 'data'
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+    steps:
+      - id: meta
+        run: |
+          echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          mkdir -p out
+          echo "由 produce 生成，sha=${GITHUB_SHA::7}" > out/note.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: note-${{ github.sha }}
+          path: out/note.txt
+          retention-days: 7
+          if-no-files-found: error
+
+  consume:
+    name: data · consume
+    needs: produce
+    if: inputs.lab == 'data'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "从 outputs 拿到 short_sha=${{ needs.produce.outputs.short_sha }}"
+      - uses: actions/download-artifact@v4
+        with:
+          name: note-${{ github.sha }}
+          path: out
+      - run: cat out/note.txt
