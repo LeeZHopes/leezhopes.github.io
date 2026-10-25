@@ -82,7 +82,7 @@ jobs:
           echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           mkdir -p out
           echo "由 produce 生成，sha=${GITHUB_SHA::7}" > out/note.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: note-${{ github.sha }}
           path: out/note.txt
