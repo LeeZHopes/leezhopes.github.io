@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "从 outputs 拿到 short_sha=${{ needs.produce.outputs.short_sha }}"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: note-${{ github.sha }}
           path: out
